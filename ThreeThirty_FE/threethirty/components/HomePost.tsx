@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
-import {Alert} from 'react-native';
 import {
   StyleSheet,
   Text,
@@ -86,7 +85,7 @@ interface HomePostProps {
     like_status: number;
     hate_status: number;
   };
-  handleGoToDetail: () => void;
+  handleGoToDetail: (post_id: number) => void;
   setIsWriteMode: any;
 }
 
@@ -98,7 +97,6 @@ const HomePost = (props: HomePostProps) => {
     post_id,
     nick_name,
     user_id,
-    // image_url,
     post_content,
     comment_count,
     like_count,
@@ -121,12 +119,10 @@ const HomePost = (props: HomePostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
   const toggleHate = async () => {
@@ -140,13 +136,11 @@ const HomePost = (props: HomePostProps) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-    }).then(() => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+    }).then(response => {
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 
@@ -171,9 +165,12 @@ const HomePost = (props: HomePostProps) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-    }).then(() => {
-      setIsUpdated(true);
-      setIsUpdated(false);
+    }).then(res => {
+      const status = JSON.stringify(res.status);
+      if (status === '200') {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 
@@ -185,7 +182,7 @@ const HomePost = (props: HomePostProps) => {
     <TouchableOpacity
       onPress={async () => {
         await setPostId();
-        handleGoToDetail();
+        handleGoToDetail(post_id);
       }}>
       {isPostWriter && (
         <View style={styles.deleteEditBox}>

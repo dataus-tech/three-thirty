@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
 
 interface PostType {
   post_id: number;
+  user_id: number;
   nick_name: string;
   image_url: string;
   post_content: string;
@@ -75,12 +76,16 @@ const HomeScreen = () => {
         },
       });
       const postData = await response.json();
-      const resCode = JSON.stringify(postData.code);
+      const resCode = JSON.stringify(postData?.code);
 
-      const status = JSON.stringify(postData.status);
+      const status = JSON.stringify(response.status);
       if (status === '500') {
         console.error('서버 에러');
         return;
+      }
+
+      if (status === '200') {
+        setData(postData);
       }
 
       if (resCode === '"EXPIRED_TOKEN"') {
@@ -93,7 +98,6 @@ const HomeScreen = () => {
               Authorization: `Bearer ${refreshToken}`,
             },
           });
-          const status = JSON.stringify(resp.status);
 
           if (status === '200') {
             const reponseData = await resp.json();
@@ -114,8 +118,6 @@ const HomeScreen = () => {
             setData(newPostData);
           }
         }
-      } else {
-        setData(postData);
       }
     } catch (err) {
       console.error(err);
@@ -124,6 +126,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     getPost();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWriteMode, isUpdated]);
 
   const handleFloatingButtonPress = () => {

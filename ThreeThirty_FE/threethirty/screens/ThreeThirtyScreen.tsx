@@ -30,23 +30,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const ThreeThirtyPostData = [
-  {id: 1, content: '너무했어, 삼전', time: '3:31pm'},
-  {id: 2, content: '너무했어, 삼전!', time: '3:32pm'},
-  {id: 3, content: '너무했어, 삼전!!', time: '3:33pm'},
-  {id: 4, content: '너무했어, 삼전!!!', time: '3:34pm'},
-  {id: 5, content: '너무했어, 삼전!!!!', time: '3:35pm'},
-  {id: 6, content: '너무했어, 삼전!!!!!', time: '3:36pm'},
-  {id: 7, content: '너무했어, 삼전!!!!', time: '3:35pm'},
-  {id: 8, content: '너무했어, 삼전!!!!!', time: '3:36pm'},
-  {id: 9, content: '너무했어, 삼전!!!!', time: '3:37pm'},
-  {id: 10, content: '너무했어, 삼전!!!!!', time: '3:38pm'},
-  {id: 11, content: '너무했어, 삼전!!!!', time: '3:40pm'},
-  {id: 12, content: '너무했어, 삼전!!!!!!!!', time: '3:36pm'},
-];
-
 interface PostType {
   post_id: number;
+  user_id: number;
   nick_name: string;
   image_url: string;
   post_content: string;
@@ -100,6 +86,7 @@ const ThreeThirtyScreen = () => {
       });
       const postData = await response.json();
       const resCode = JSON.stringify(postData.code);
+
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
           const resp = await fetch(`${API_URL}/users/refreshToken`, {
@@ -111,7 +98,6 @@ const ThreeThirtyScreen = () => {
             },
           });
           const status = JSON.stringify(resp.status);
-
           if (status === '200') {
             const reponseData = await resp.json();
             const newUserData = JSON.stringify(reponseData);
@@ -141,7 +127,9 @@ const ThreeThirtyScreen = () => {
 
   useEffect(() => {
     getPost();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isWriteMode, isUpdated]);
+
   return (
     <>
       {isWriteMode ? (
@@ -155,7 +143,7 @@ const ThreeThirtyScreen = () => {
           <ScrollView>
             {data.map(post => (
               <ThreeThirtyPost
-                key={post.id}
+                key={post.post_id}
                 data={post}
                 handleGoToDetail={handleGoToDetail}
                 setIsWriteMode={setIsWriteMode}

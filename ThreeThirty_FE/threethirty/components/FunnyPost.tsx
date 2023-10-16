@@ -1,81 +1,5 @@
-// import React from 'react';
-// import {StyleSheet, Text, View} from 'react-native';
-// import Icon from 'react-native-vector-icons/MaterialIcons';
-
-// const styles = StyleSheet.create({
-//   container: {
-//     alignItems: 'center',
-//     paddingHorizontal: 30,
-//     paddingVertical: 30,
-//     borderBottomWidth: 1,
-//   },
-//   contentBox: {
-//     flexDirection: 'row',
-//   },
-//   rank: {
-//     fontSize: 30,
-//     marginRight: 10,
-//   },
-//   bottomBox: {
-//     display: 'flex',
-//     flexDirection: 'row',
-//   },
-//   bottomSubBox: {
-//     width: 100,
-//     paddingTop: 30,
-//     flex: 1,
-//     alignItems: 'center',
-//     flexDirection: 'row',
-//   },
-//   num: {
-//     marginLeft: 4,
-//   },
-// });
-
-// interface FunnyPostProps {
-//   data: {
-//     id: number;
-//     rank: number;
-//     content: string;
-//     commentCount: number;
-//     likeCount: number;
-//     disLikeCount: number;
-//   };
-// }
-
-// const FunnyPost = (props: FunnyPostProps) => {
-//   const {rank, content, commentCount, likeCount, disLikeCount} = props.data;
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.contentBox}>
-//         <Text style={styles.rank}>{rank}</Text>
-//         <View>
-//           <Text>{content}</Text>
-//           <View style={styles.bottomBox}>
-//             <View style={styles.bottomSubBox}>
-//               <Icon name="comment" size={30} />
-//               <Text style={styles.num}>{commentCount}</Text>
-//             </View>
-//             <View style={styles.bottomSubBox}>
-//               <Icon name="thumb-up" size={30} color="gray" />
-//               <Text style={styles.num}>{likeCount}</Text>
-//             </View>
-//             <View style={styles.bottomSubBox}>
-//               <Icon name="thumb-down" size={30} color="gray" />
-//               <Text style={styles.num}>{disLikeCount}</Text>
-//             </View>
-//           </View>
-//         </View>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default FunnyPost;
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
-import {Alert} from 'react-native';
 import {
   StyleSheet,
   Text,
@@ -173,7 +97,6 @@ const FunnyPost = (props: FunnyPostProps) => {
     post_id,
     nick_name,
     user_id,
-    // image_url,
     post_content,
     comment_count,
     like_count,
@@ -196,14 +119,13 @@ const FunnyPost = (props: FunnyPostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
+
   const toggleHate = async () => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
@@ -216,12 +138,10 @@ const FunnyPost = (props: FunnyPostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 
@@ -247,8 +167,10 @@ const FunnyPost = (props: FunnyPostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      setIsUpdated(true);
-      setIsUpdated(false);
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 

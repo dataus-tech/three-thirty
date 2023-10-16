@@ -52,9 +52,16 @@ const styles = StyleSheet.create({
   },
 });
 
+interface CommentType {
+  comment_id: number;
+  post_id: number;
+  user_id: number;
+  comment_content: number;
+}
+
 const Comment = ({navigation}: any) => {
   const [isUpdated, setIsUpdated] = useRecoilState(updateState);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<CommentType[]>([]);
 
   const storeData = async (userData: any) => {
     try {
@@ -81,6 +88,12 @@ const Comment = ({navigation}: any) => {
       });
       const commentData = await response.json();
       const resCode = JSON.stringify(commentData.code);
+
+      const resStatus = JSON.stringify(response.status);
+      if (resStatus === '200') {
+        setData(commentData);
+      }
+
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
           const resp = await fetch(`${API_URL}/users/refreshToken`, {
@@ -112,8 +125,6 @@ const Comment = ({navigation}: any) => {
             setData(newCommentData);
           }
         }
-      } else {
-        setData(commentData);
       }
     } catch (err) {
       console.error(err);
@@ -126,6 +137,7 @@ const Comment = ({navigation}: any) => {
       getComments();
     });
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, isUpdated]);
 
   const [comment, setComment] = useState('');
@@ -149,13 +161,9 @@ const Comment = ({navigation}: any) => {
         post_id: postId,
       }),
     }).then(() => {
-      // const status = JSON.stringify(response?.status);
       setIsUpdated(true);
       setIsUpdated(false);
       setComment('');
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
     });
   };
 
@@ -178,9 +186,10 @@ const Comment = ({navigation}: any) => {
 
       <ScrollView>
         <View style={styles.comments}>
-          {data?.map(post => (
-            <CommentBox key={post?.comment_id} post={post} />
-          ))}
+          {data?.map(post => {
+            const commentId = post?.comment_id;
+            return <CommentBox key={commentId} post={post} />;
+          })}
         </View>
       </ScrollView>
     </View>

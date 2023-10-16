@@ -193,6 +193,12 @@ const FunnyScreen = () => {
       });
       const postData = await response.json();
       const resCode = JSON.stringify(postData.code);
+      const status = JSON.stringify(response.status);
+
+      if (status === '200') {
+        setData(postData);
+      }
+
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
           const resp = await fetch(`${API_URL}/users/refreshToken`, {
@@ -203,9 +209,9 @@ const FunnyScreen = () => {
               Authorization: `Bearer ${refreshToken}`,
             },
           });
-          const status = JSON.stringify(resp.status);
+          const newStatus = JSON.stringify(resp.status);
 
-          if (status === '200') {
+          if (newStatus === '200') {
             const reponseData = await resp.json();
             const newUserData = JSON.stringify(reponseData);
             storeData(newUserData);
@@ -224,8 +230,6 @@ const FunnyScreen = () => {
             setData(newPostData);
           }
         }
-      } else {
-        setData(postData);
       }
     } catch (err) {
       console.error(err);

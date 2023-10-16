@@ -54,47 +54,106 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
       setText(post.post_content);
       setCompany(post.company_title);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const writePost = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
+  const storeData = async (userData: any) => {
+    try {
+      await AsyncStorage.setItem('userData', userData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    fetch(`${API_URL}/post/create`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        post_type_title: isThreeThirty ? 'threeThirty' : 'general',
-        company_title: company,
-        post_content: text,
-        hashtag_content: hashtags,
-        attach_file: [
-          {
-            attach_file_url: 'http://example.com/file1.pdf',
-            attach_file_type: 'pdf',
-          },
-          {
-            attach_file_url: 'http://example.com/image.jpg',
-            attach_file_type: 'image',
-          },
-        ],
-      }),
-    }).then(response => {
-      const status = JSON.stringify(response?.status);
-      if (status === '401') {
-        Alert.alert('토큰 만료');
-      }
-      if (status === '200') {
+  const writePost = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('userData');
+      const accessToken = JSON.parse(userData!)?.accessToken;
+      const refreshToken = JSON.parse(userData!)?.refreshToken;
+
+      const response = await fetch(`${API_URL}/post/create`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          post_type_title: isThreeThirty ? 'threeThirty' : 'general',
+          company_title: company,
+          post_content: text,
+          hashtag_content: hashtags,
+          attach_file: [
+            {
+              attach_file_url: 'http://example.com/file1.pdf',
+              attach_file_type: 'pdf',
+            },
+            {
+              attach_file_url: 'http://example.com/image.jpg',
+              attach_file_type: 'image',
+            },
+          ],
+        }),
+      });
+      const resp = await response.json();
+      const message = JSON.stringify(resp.message);
+      const status = JSON.stringify(response.status);
+      if (message === '"기간이 만료된 토큰"') {
+        if (refreshToken) {
+          const newResp = await fetch(`${API_URL}/users/refreshToken`, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          });
+          const newStatus = JSON.stringify(newResp.status);
+          if (newStatus === '200') {
+            const reponseData = await newResp.json();
+            const newUserData = JSON.stringify(reponseData);
+            storeData(newUserData);
+
+            const newResponse = await fetch(`${API_URL}/post/create`, {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                post_type_title: isThreeThirty ? 'threeThirty' : 'general',
+                company_title: company,
+                post_content: text,
+                hashtag_content: hashtags,
+                attach_file: [
+                  {
+                    attach_file_url: 'http://example.com/file1.pdf',
+                    attach_file_type: 'pdf',
+                  },
+                  {
+                    attach_file_url: 'http://example.com/image.jpg',
+                    attach_file_type: 'image',
+                  },
+                ],
+              }),
+            });
+            const resStatus = JSON.stringify(newResponse.status);
+            if (resStatus === '200') {
+              Alert.alert('게시물 작성이 완료되었습니다.');
+              setIsWriteMode(false);
+            }
+          }
+        }
+      } else if (status === '200') {
         Alert.alert('게시물 작성이 완료되었습니다.');
         setIsWriteMode(false);
       } else {
         Alert.alert('게시물 작성에 실패했습니다.');
       }
-    });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const editPost = async () => {

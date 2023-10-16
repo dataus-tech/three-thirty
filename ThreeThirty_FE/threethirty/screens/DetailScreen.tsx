@@ -54,8 +54,18 @@ const styles = StyleSheet.create({
   },
 });
 
-const DetailScreen = ({navigation}) => {
-  const [detailData, setDetailData] = useState({});
+interface DetailPostType {
+  nick_name: number;
+  post_content: string;
+  comment_count: number;
+  like_count: number;
+  hate_count: number;
+  like_status: number;
+  hate_status: number;
+}
+
+const DetailScreen = ({navigation}: any) => {
+  const [detailData, setDetailData] = useState<DetailPostType[]>([]);
 
   const storeData = async (userData: any) => {
     try {
@@ -82,6 +92,11 @@ const DetailScreen = ({navigation}) => {
       });
       const postData = await response.json();
       const resCode = JSON.stringify(postData.code);
+      const status = JSON.stringify(response.status);
+      if (status === '200') {
+        setDetailData(postData);
+      }
+
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
           const resp = await fetch(`${API_URL}/users/refreshToken`, {
@@ -92,9 +107,9 @@ const DetailScreen = ({navigation}) => {
               Authorization: `Bearer ${refreshToken}`,
             },
           });
-          const status = JSON.stringify(resp.status);
+          const newStatus = JSON.stringify(resp.status);
 
-          if (status === '200') {
+          if (newStatus === '200') {
             const reponseData = await resp.json();
             const newUserData = JSON.stringify(reponseData);
             storeData(newUserData);
@@ -113,8 +128,6 @@ const DetailScreen = ({navigation}) => {
             setDetailData(newPostData);
           }
         }
-      } else {
-        setDetailData(postData);
       }
     } catch (err) {
       console.error(err);
@@ -129,6 +142,7 @@ const DetailScreen = ({navigation}) => {
       getDetailPost();
     });
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, isUpdated]);
 
   const nick_name = detailData[0]?.nick_name;
@@ -152,12 +166,10 @@ const DetailScreen = ({navigation}) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
   const toggleHate = async () => {
@@ -173,12 +185,10 @@ const DetailScreen = ({navigation}) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 

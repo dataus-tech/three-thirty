@@ -1,46 +1,5 @@
-// import React from 'react';
-// import {StyleSheet, Text, View} from 'react-native';
-
-// const styles = StyleSheet.create({
-//   container: {
-//     alignItems: 'center',
-//     paddingVertical: 10,
-//     paddingHorizontal: 30,
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//   },
-//   content: {
-//     fontSize: 20,
-//     fontWeight: '800',
-//     flex: 1,
-//   },
-//   time: {
-//     color: 'gray',
-//   },
-// });
-
-// interface ThreeThirtyPostProps {
-//   data: {
-//     id: number;
-//     content: string;
-//     time: string;
-//   };
-// }
-
-// const ThreeThirtyPost = (props: ThreeThirtyPostProps) => {
-//   const {content, time} = props.data;
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.content}>{content}</Text>
-//       <Text style={styles.time}>{time}</Text>
-//     </View>
-//   );
-// };
-
-// export default ThreeThirtyPost;
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
-import {Alert} from 'react-native';
 import {
   StyleSheet,
   Text,
@@ -126,7 +85,7 @@ interface ThreeThirtyPostProps {
     like_status: number;
     hate_status: number;
   };
-  handleGoToDetail: () => void;
+  handleGoToDetail: (post_id: number) => void;
   setIsWriteMode: any;
 }
 
@@ -138,7 +97,6 @@ const ThreeThirtyPost = (props: ThreeThirtyPostProps) => {
     post_id,
     nick_name,
     user_id,
-    // image_url,
     post_content,
     comment_count,
     like_count,
@@ -161,12 +119,10 @@ const ThreeThirtyPost = (props: ThreeThirtyPostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
   const toggleHate = async () => {
@@ -181,12 +137,10 @@ const ThreeThirtyPost = (props: ThreeThirtyPostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      // const status = JSON.stringify(response?.status);
-      setIsUpdated(true);
-      setIsUpdated(false);
-      // if (status === '401') {
-      //   Alert.alert('토큰 만료');
-      // }
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 
@@ -212,8 +166,10 @@ const ThreeThirtyPost = (props: ThreeThirtyPostProps) => {
         Authorization: `Bearer ${accessToken}`,
       },
     }).then(response => {
-      setIsUpdated(true);
-      setIsUpdated(false);
+      if (response.status === 200) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+      }
     });
   };
 
@@ -225,7 +181,7 @@ const ThreeThirtyPost = (props: ThreeThirtyPostProps) => {
     <TouchableOpacity
       onPress={async () => {
         await setPostId();
-        handleGoToDetail();
+        handleGoToDetail(post_id);
       }}>
       {isPostWriter && (
         <View style={styles.deleteEditBox}>

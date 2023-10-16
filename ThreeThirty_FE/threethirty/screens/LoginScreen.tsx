@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-// import {API_URL} from '@env';
+import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 

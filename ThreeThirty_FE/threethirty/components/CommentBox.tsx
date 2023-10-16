@@ -114,6 +114,7 @@ const CommentBox = ({post}: any) => {
       }),
     }).then(response => {
       const status = JSON.stringify(response?.status);
+
       if (status === '200') {
         setIsUpdated(true);
         setIsUpdated(false);
