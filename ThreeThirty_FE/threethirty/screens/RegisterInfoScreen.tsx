@@ -5,8 +5,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableNativeFeedback,
   StyleSheet,
 } from 'react-native';
+import {Alert} from 'react-native';
+import {API_URL} from '@env';
 
 const styles = StyleSheet.create({
   desc: {
@@ -80,14 +83,14 @@ const RegisterInfoScreen = ({navigation}: RegisterInfoScreenProps) => {
         secureTextEntry={true}
       />
 
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate('UserProfileInfo', {userBaseInfo, resetBaseInfo})
-        }>
+      <TouchableNativeFeedback
+        onPress={() => {
+          navigation.navigate('UserProfileInfo', {userBaseInfo, resetBaseInfo});
+        }}>
         <View style={styles.nextButton}>
           <Text>Next</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableNativeFeedback>
     </View>
   );
 };

@@ -12,6 +12,7 @@ import {
 import RadioGroup, {RadioButtonProps} from 'react-native-radio-buttons-group';
 import {MediaType, launchImageLibrary} from 'react-native-image-picker';
 import AuthAvatar from '../components/AuthAvatar';
+import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -103,7 +104,7 @@ const RegisterProfileInfoScreen = ({route, navigation}: any) => {
   };
 
   const register = () => {
-    fetch('http://localhost:8080/users', {
+    fetch(`${API_URL}/users`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

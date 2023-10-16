@@ -11,6 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
+import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -112,7 +113,7 @@ const HomePost = (props: HomePostProps) => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
 
-    fetch(`http://localhost:8080/post/like/${post_id}`, {
+    fetch(`${API_URL}/post/like/${post_id}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -132,14 +133,14 @@ const HomePost = (props: HomePostProps) => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
 
-    fetch(`http://localhost:8080/post/hate/${post_id}`, {
+    fetch(`${API_URL}/post/hate/${post_id}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-    }).then(response => {
+    }).then(() => {
       // const status = JSON.stringify(response?.status);
       setIsUpdated(true);
       setIsUpdated(false);
@@ -163,14 +164,14 @@ const HomePost = (props: HomePostProps) => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
 
-    fetch(`http://localhost:8080/post/${post_id}`, {
+    fetch(`${API_URL}/post/${post_id}`, {
       method: 'DELETE',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-    }).then(response => {
+    }).then(() => {
       setIsUpdated(true);
       setIsUpdated(false);
     });

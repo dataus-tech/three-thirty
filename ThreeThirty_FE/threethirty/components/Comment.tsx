@@ -5,8 +5,8 @@ import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {TouchableOpacity} from 'react-native';
-import {Alert} from 'react-native';
 import CommentBox from './CommentBox';
+import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const Comment = ({navigation}) => {
+const Comment = ({navigation}: any) => {
   const [isUpdated, setIsUpdated] = useRecoilState(updateState);
   const [data, setData] = useState([]);
 
@@ -71,22 +71,19 @@ const Comment = ({navigation}) => {
       const accessToken = JSON.parse(userData!)?.accessToken;
       const refreshToken = JSON.parse(userData!)?.refreshToken;
 
-      const response = await fetch(
-        `http://localhost:8080/post/${postId}/comments`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
+      const response = await fetch(`${API_URL}/post/${postId}/comments`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
+      });
       const commentData = await response.json();
       const resCode = JSON.stringify(commentData.code);
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
-          const resp = await fetch('http://localhost:8080/users/refreshToken', {
+          const resp = await fetch(`${API_URL}/users/refreshToken`, {
             method: 'POST',
             headers: {
               Accept: 'application/json',
@@ -103,17 +100,14 @@ const Comment = ({navigation}) => {
 
             const newAccessToken = reponseData.accessToken;
 
-            const res = await fetch(
-              `http://localhost:8080/post/${postId}/comments`,
-              {
-                method: 'GET',
-                headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${newAccessToken}`,
-                },
+            const res = await fetch(`${API_URL}/post/${postId}/comments`, {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${newAccessToken}`,
               },
-            );
+            });
             const newCommentData = await res.json();
             setData(newCommentData);
           }
@@ -142,7 +136,7 @@ const Comment = ({navigation}) => {
     const postId = Number(await AsyncStorage.getItem('post_id'));
     const userId = JSON.parse(userData!)?.user_id;
 
-    fetch(`http://localhost:8080/post/${postId}/comments/create`, {
+    fetch(`${API_URL}/post/${postId}/comments/create`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -154,7 +148,7 @@ const Comment = ({navigation}) => {
         user_id: userId,
         post_id: postId,
       }),
-    }).then(response => {
+    }).then(() => {
       // const status = JSON.stringify(response?.status);
       setIsUpdated(true);
       setIsUpdated(false);
@@ -164,37 +158,6 @@ const Comment = ({navigation}) => {
       // }
     });
   };
-
-  const deleteComment = async post => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-    const postId = Number(await AsyncStorage.getItem('post_id'));
-
-    fetch(`http://localhost:8080/post/${postId}/comments/${post?.comment_id}`, {
-      method: 'DELETE',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }).then(response => {
-      const status = JSON.stringify(response?.status);
-      if (status === '200') {
-        setIsUpdated(true);
-        setIsUpdated(false);
-      }
-    });
-  };
-
-  const [userId, setUserId] = useState();
-
-  useEffect(() => {
-    async function fetchData() {
-      const userData = await AsyncStorage.getItem('userData');
-      setUserId(JSON.parse(userData!)?.user_id);
-    }
-    fetchData();
-  }, []);
 
   return (
     <View style={styles.container}>

@@ -7,6 +7,7 @@ import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
+import {API_URL} from '@env';
 
 const styles = StyleSheet.create({
   container: {
@@ -65,8 +66,7 @@ const HomeScreen = () => {
       const userData = await AsyncStorage.getItem('userData');
       const accessToken = JSON.parse(userData!)?.accessToken;
       const refreshToken = JSON.parse(userData!)?.refreshToken;
-
-      const response = await fetch('http://localhost:8080/post/general', {
+      const response = await fetch(`${API_URL}/post/general`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -76,9 +76,16 @@ const HomeScreen = () => {
       });
       const postData = await response.json();
       const resCode = JSON.stringify(postData.code);
+
+      const status = JSON.stringify(postData.status);
+      if (status === '500') {
+        console.error('서버 에러');
+        return;
+      }
+
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
-          const resp = await fetch('http://localhost:8080/users/refreshToken', {
+          const resp = await fetch(`${API_URL}/users/refreshToken`, {
             method: 'POST',
             headers: {
               Accept: 'application/json',
@@ -95,7 +102,7 @@ const HomeScreen = () => {
 
             const newAccessToken = reponseData.accessToken;
 
-            const res = await fetch('http://localhost:8080/post/general', {
+            const res = await fetch(`${API_URL}/post/general`, {
               method: 'GET',
               headers: {
                 Accept: 'application/json',

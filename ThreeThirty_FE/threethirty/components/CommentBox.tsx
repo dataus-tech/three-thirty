@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
-import {Alert} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
+import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -67,7 +66,7 @@ const CommentBox = ({post}: any) => {
     const accessToken = JSON.parse(userData!)?.accessToken;
     const postId = Number(await AsyncStorage.getItem('post_id'));
 
-    fetch(`http://localhost:8080/post/${postId}/comments/${commentId}`, {
+    fetch(`${API_URL}/post/${postId}/comments/${commentId}`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -101,7 +100,7 @@ const CommentBox = ({post}: any) => {
     const accessToken = JSON.parse(userData!)?.accessToken;
     const postId = Number(await AsyncStorage.getItem('post_id'));
 
-    fetch(`http://localhost:8080/post/${postId}/comments/${commentId}`, {
+    fetch(`${API_URL}/post/${postId}/comments/${commentId}`, {
       method: 'PATCH',
       headers: {
         Accept: 'application/json',

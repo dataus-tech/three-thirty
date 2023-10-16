@@ -1,3 +1,4 @@
+import {API_URL} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState} from 'react';
 import {Alert} from 'react-native';
@@ -48,7 +49,7 @@ const TabAvatar = ({updateUserInfo}: any) => {
     const userData = await AsyncStorage.getItem('userData');
     const refreshToken = JSON.parse(userData!)?.refreshToken;
 
-    fetch('http://localhost:8080/users/logout', {
+    fetch(`${API_URL}/users/logout`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

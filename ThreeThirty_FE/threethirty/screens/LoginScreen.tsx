@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+// import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -61,7 +62,7 @@ const LoginScreen = ({updateUserInfo}: any) => {
     if (email === '' || password === '') {
       Alert.alert('사용자 정보를 입력해주세요.');
     } else {
-      fetch('http://localhost:8080/users/login', {
+      fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -74,6 +75,7 @@ const LoginScreen = ({updateUserInfo}: any) => {
       })
         .then(response => {
           const status = JSON.stringify(response?.status);
+
           if (status === '200') {
             return response.json();
           } else {
@@ -93,6 +95,10 @@ const LoginScreen = ({updateUserInfo}: any) => {
               setPassword('');
             }
           }
+        })
+        .catch(err => {
+          alert(err);
+          console.error(err);
         });
     }
   };

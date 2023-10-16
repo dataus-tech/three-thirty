@@ -1,3 +1,4 @@
+import {API_URL} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
@@ -59,7 +60,7 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
 
-    fetch('http://localhost:8080/post/create', {
+    fetch(`${API_URL}/post/create`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -100,7 +101,7 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
 
-    fetch(`http://localhost:8080/post/${postId}`, {
+    fetch(`${API_URL}/post/${postId}`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

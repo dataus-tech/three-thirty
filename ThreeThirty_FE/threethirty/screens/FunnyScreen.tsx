@@ -90,6 +90,7 @@
 
 // export default FunnyScreen;
 
+import {API_URL} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
@@ -182,7 +183,7 @@ const FunnyScreen = () => {
       const accessToken = JSON.parse(userData!)?.accessToken;
       const refreshToken = JSON.parse(userData!)?.refreshToken;
 
-      const response = await fetch('http://localhost:8080/post/best', {
+      const response = await fetch(`${API_URL}/post/best`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -194,7 +195,7 @@ const FunnyScreen = () => {
       const resCode = JSON.stringify(postData.code);
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
-          const resp = await fetch('http://localhost:8080/users/refreshToken', {
+          const resp = await fetch(`${API_URL}/users/refreshToken`, {
             method: 'POST',
             headers: {
               Accept: 'application/json',
@@ -211,7 +212,7 @@ const FunnyScreen = () => {
 
             const newAccessToken = reponseData.accessToken;
 
-            const res = await fetch('http://localhost:8080/post/best', {
+            const res = await fetch(`${API_URL}/post/best`, {
               method: 'GET',
               headers: {
                 Accept: 'application/json',

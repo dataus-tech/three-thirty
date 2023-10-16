@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
 import Comment from '../components/Comment';
+import {API_URL} from '@env';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -71,7 +72,7 @@ const DetailScreen = ({navigation}) => {
       const accessToken = JSON.parse(userData!)?.accessToken;
       const refreshToken = JSON.parse(userData!)?.refreshToken;
 
-      const response = await fetch(`http://localhost:8080/post/${postId}`, {
+      const response = await fetch(`${API_URL}/post/${postId}`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -83,7 +84,7 @@ const DetailScreen = ({navigation}) => {
       const resCode = JSON.stringify(postData.code);
       if (resCode === '"EXPIRED_TOKEN"') {
         if (refreshToken) {
-          const resp = await fetch('http://localhost:8080/users/refreshToken', {
+          const resp = await fetch(`${API_URL}/users/refreshToken`, {
             method: 'POST',
             headers: {
               Accept: 'application/json',
@@ -100,7 +101,7 @@ const DetailScreen = ({navigation}) => {
 
             const newAccessToken = reponseData.accessToken;
 
-            const res = await fetch(`http://localhost:8080/post/${postId}`, {
+            const res = await fetch(`${API_URL}/post/${postId}`, {
               method: 'GET',
               headers: {
                 Accept: 'application/json',
@@ -143,7 +144,7 @@ const DetailScreen = ({navigation}) => {
     const accessToken = JSON.parse(userData!)?.accessToken;
     const postId = Number(await AsyncStorage.getItem('post_id'));
 
-    fetch(`http://localhost:8080/post/like/${postId}`, {
+    fetch(`${API_URL}/post/like/${postId}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -164,7 +165,7 @@ const DetailScreen = ({navigation}) => {
     const accessToken = JSON.parse(userData!)?.accessToken;
     const postId = Number(await AsyncStorage.getItem('post_id'));
 
-    fetch(`http://localhost:8080/post/hate/${postId}`, {
+    fetch(`${API_URL}/post/hate/${postId}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
