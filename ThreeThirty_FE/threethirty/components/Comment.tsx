@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {TouchableOpacity} from 'react-native';
 import CommentBox from './CommentBox';
 import {API_URL} from '@env';
+import handleExpiredToken from '../utils/handleExpiredToken';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -76,7 +77,6 @@ const Comment = ({navigation}: any) => {
       const userData = await AsyncStorage.getItem('userData');
       const postId = Number(await AsyncStorage.getItem('post_id'));
       const accessToken = JSON.parse(userData!)?.accessToken;
-      const refreshToken = JSON.parse(userData!)?.refreshToken;
 
       const response = await fetch(`${API_URL}/post/${postId}/comments`, {
         method: 'GET',
@@ -95,35 +95,18 @@ const Comment = ({navigation}: any) => {
       }
 
       if (resCode === '"EXPIRED_TOKEN"') {
-        if (refreshToken) {
-          const resp = await fetch(`${API_URL}/users/refreshToken`, {
-            method: 'POST',
+        const newAccessToken = await handleExpiredToken();
+        if (newAccessToken) {
+          const res = await fetch(`${API_URL}/post/${postId}/comments`, {
+            method: 'GET',
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${refreshToken}`,
+              Authorization: `Bearer ${newAccessToken}`,
             },
           });
-          const status = JSON.stringify(resp.status);
-
-          if (status === '200') {
-            const reponseData = await resp.json();
-            const newUserData = JSON.stringify(reponseData);
-            storeData(newUserData);
-
-            const newAccessToken = reponseData.accessToken;
-
-            const res = await fetch(`${API_URL}/post/${postId}/comments`, {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${newAccessToken}`,
-              },
-            });
-            const newCommentData = await res.json();
-            setData(newCommentData);
-          }
+          const newCommentData = await res.json();
+          setData(newCommentData);
         }
       }
     } catch (err) {

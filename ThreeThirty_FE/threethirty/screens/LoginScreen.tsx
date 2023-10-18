@@ -97,7 +97,6 @@ const LoginScreen = ({updateUserInfo}: any) => {
           }
         })
         .catch(err => {
-          alert(err);
           console.error(err);
         });
     }

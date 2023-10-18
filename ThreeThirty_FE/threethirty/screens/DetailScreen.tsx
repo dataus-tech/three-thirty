@@ -12,6 +12,7 @@ import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
 import Comment from '../components/Comment';
 import {API_URL} from '@env';
+import handleExpiredToken from '../utils/handleExpiredToken';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -67,20 +68,11 @@ interface DetailPostType {
 const DetailScreen = ({navigation}: any) => {
   const [detailData, setDetailData] = useState<DetailPostType[]>([]);
 
-  const storeData = async (userData: any) => {
-    try {
-      await AsyncStorage.setItem('userData', userData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getDetailPost = async () => {
     try {
       const userData = await AsyncStorage.getItem('userData');
       const postId = Number(await AsyncStorage.getItem('post_id'));
       const accessToken = JSON.parse(userData!)?.accessToken;
-      const refreshToken = JSON.parse(userData!)?.refreshToken;
 
       const response = await fetch(`${API_URL}/post/${postId}`, {
         method: 'GET',
@@ -98,35 +90,18 @@ const DetailScreen = ({navigation}: any) => {
       }
 
       if (resCode === '"EXPIRED_TOKEN"') {
-        if (refreshToken) {
-          const resp = await fetch(`${API_URL}/users/refreshToken`, {
-            method: 'POST',
+        const newAccessToken = await handleExpiredToken();
+        if (newAccessToken) {
+          const res = await fetch(`${API_URL}/post/${postId}`, {
+            method: 'GET',
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${refreshToken}`,
+              Authorization: `Bearer ${newAccessToken}`,
             },
           });
-          const newStatus = JSON.stringify(resp.status);
-
-          if (newStatus === '200') {
-            const reponseData = await resp.json();
-            const newUserData = JSON.stringify(reponseData);
-            storeData(newUserData);
-
-            const newAccessToken = reponseData.accessToken;
-
-            const res = await fetch(`${API_URL}/post/${postId}`, {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${newAccessToken}`,
-              },
-            });
-            const newPostData = await res.json();
-            setDetailData(newPostData);
-          }
+          const newPostData = await res.json();
+          setDetailData(newPostData);
         }
       }
     } catch (err) {
@@ -142,7 +117,6 @@ const DetailScreen = ({navigation}: any) => {
       getDetailPost();
     });
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigation, isUpdated]);
 
   const nick_name = detailData[0]?.nick_name;

@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
 import {API_URL} from '@env';
+import {PostType} from '../types/types';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -68,28 +69,13 @@ const styles = StyleSheet.create({
   },
 });
 
-interface FunnyPostProps {
-  data: {
-    post_id: number;
-    user_id: number;
-    nick_name: string;
-    image_url: string;
-    post_content: string;
-    update_date: null | string;
-    like_count: number;
-    hate_count: number;
-    comment_count: number;
-    company_title: string;
-    hashtag_content: string[];
-    attach_file_url: string[];
-    like_status: number;
-    hate_status: number;
-  };
-  handleGoToDetail: () => void;
+interface PostProps {
+  data: PostType;
+  handleGoToDetail: (post_id: number) => void;
   setIsWriteMode: any;
 }
 
-const FunnyPost = (props: FunnyPostProps) => {
+const Post = (props: PostProps) => {
   const [userId, setUserId] = useState('');
   const [_, setIsUpdated] = useRecoilState(updateState);
 
@@ -125,7 +111,6 @@ const FunnyPost = (props: FunnyPostProps) => {
       }
     });
   };
-
   const toggleHate = async () => {
     const userData = await AsyncStorage.getItem('userData');
     const accessToken = JSON.parse(userData!)?.accessToken;
@@ -166,8 +151,9 @@ const FunnyPost = (props: FunnyPostProps) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-    }).then(response => {
-      if (response.status === 200) {
+    }).then(res => {
+      const status = JSON.stringify(res.status);
+      if (status === '200') {
         setIsUpdated(true);
         setIsUpdated(false);
       }
@@ -182,7 +168,7 @@ const FunnyPost = (props: FunnyPostProps) => {
     <TouchableOpacity
       onPress={async () => {
         await setPostId();
-        handleGoToDetail();
+        handleGoToDetail(post_id);
       }}>
       {isPostWriter && (
         <View style={styles.deleteEditBox}>
@@ -238,4 +224,4 @@ const FunnyPost = (props: FunnyPostProps) => {
   );
 };
 
-export default FunnyPost;
+export default Post;

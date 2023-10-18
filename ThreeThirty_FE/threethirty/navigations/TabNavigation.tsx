@@ -7,15 +7,13 @@ import Header from '../components/Header';
 import SearchHeader from '../components/SearchHeader';
 import CommunityHeader from '../components/CommunityHeader';
 import NotificationHeader from '../components/NotificationHeader';
-import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
 import NotificationScreen from '../screens/NotificationScreen';
 import CommunityScreen from '../screens/CommunityScreen';
-import ThreeThirtyScreen from '../screens/ThreeThirtyScreen';
-import FunnyScreen from '../screens/FunnyScreen';
 import FollowingScreen from '../screens/FollowingScreen';
 import {createStackNavigator} from '@react-navigation/stack';
 import DetailScreen from '../screens/DetailScreen';
+import MainScreen from '../screens/MainScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,6 +26,16 @@ const NoTabNavigator = () => (
 
 function TabNavigation({updateUserInfo}: any) {
   const [screen, setScreen] = useState('main');
+
+  const category = () => {
+    if (screen === 'main') {
+      return 'general';
+    } else if (screen === 'threeThirty') {
+      return 'threethirty';
+    } else if (screen === 'funny') {
+      return 'best';
+    }
+  };
 
   return (
     <NavigationContainer>
@@ -42,13 +50,13 @@ function TabNavigation({updateUserInfo}: any) {
         />
         <Tab.Screen
           name="Home"
-          component={
-            (screen === 'main' && HomeScreen) ||
-            (screen === 'threeThirty' && ThreeThirtyScreen) ||
-            (screen === 'funny' && FunnyScreen) ||
-            (screen === 'following' && FollowingScreen) ||
-            HomeScreen
-          }
+          component={() => {
+            return screen === 'following' ? (
+              <FollowingScreen />
+            ) : (
+              <MainScreen category={category()} />
+            );
+          }}
           options={{
             title: '홈',
             tabBarIcon: ({color, size}) => (
