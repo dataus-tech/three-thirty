@@ -64,14 +64,6 @@ const Comment = ({navigation}: any) => {
   const [isUpdated, setIsUpdated] = useRecoilState(updateState);
   const [data, setData] = useState<CommentType[]>([]);
 
-  const storeData = async (userData: any) => {
-    try {
-      await AsyncStorage.setItem('userData', userData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getComments = async () => {
     try {
       const userData = await AsyncStorage.getItem('userData');
