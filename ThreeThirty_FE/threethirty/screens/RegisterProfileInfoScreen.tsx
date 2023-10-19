@@ -119,20 +119,16 @@ const RegisterProfileInfoScreen = ({route, navigation}: any) => {
         nick_name: nickname,
         notification_status: norificationStatus,
       }),
-    })
-      .then(response => {
-        return response;
-      })
-      .then(res => {
-        const status = JSON.stringify(res?.status);
-        if (status === '201') {
-          Alert.alert('회원가입이 완료되었습니다.');
-          resetUserInfo();
-          navigation.navigate('Login');
-        } else {
-          Alert.alert('회원가입에 실패했습니다.');
-        }
-      });
+    }).then(response => {
+      const status = JSON.stringify(response?.status);
+      if (status === '201') {
+        Alert.alert('회원가입이 완료되었습니다.');
+        resetUserInfo();
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('회원가입에 실패했습니다.');
+      }
+    });
   };
 
   return (
