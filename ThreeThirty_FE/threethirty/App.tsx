@@ -1,36 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import AuthNavigation from './navigations/AuthNavigation';
 import TabNavigation from './navigations/TabNavigation';
-import {RecoilRoot} from 'recoil';
+import {useRecoilState} from 'recoil';
+import {userState} from './recoil/userState';
 
 function App(): JSX.Element {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData] = useRecoilState(userState);
 
-  const updateUserInfo = async () => {
-    try {
-      const value = await AsyncStorage.getItem('userData');
-      if (value !== null) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
-    } catch (error) {
-      // Error retrieving data
-    }
-  };
+  const isLoggedIn = !!userData;
 
-  useEffect(() => {
-    updateUserInfo();
-  }, [isLoggedIn]);
-
-  return isLoggedIn ? (
-    <RecoilRoot>
-      <TabNavigation updateUserInfo={updateUserInfo} />
-    </RecoilRoot>
-  ) : (
-    <AuthNavigation updateUserInfo={updateUserInfo} />
-  );
+  return isLoggedIn ? <TabNavigation /> : <AuthNavigation />;
 }
 
 export default App;

@@ -24,7 +24,7 @@ const NoTabNavigator = () => (
   </Stack.Navigator>
 );
 
-function TabNavigation({updateUserInfo}: any) {
+function TabNavigation() {
   const [screen, setScreen] = useState('main');
 
   const category = () => {
@@ -63,9 +63,7 @@ function TabNavigation({updateUserInfo}: any) {
               <Icon name="home" color={color} size={size} />
             ),
             headerTitle: () => {
-              return (
-                <Header setScreen={setScreen} updateUserInfo={updateUserInfo} />
-              );
+              return <Header setScreen={setScreen} />;
             },
           }}
         />

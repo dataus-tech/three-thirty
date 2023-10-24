@@ -11,7 +11,7 @@ import RegisterProfileInfoScreen from '../screens/RegisterProfileInfoScreen';
 
 const Stack = createStackNavigator();
 
-const AuthNavigation = ({updateUserInfo}: any) => {
+const AuthNavigation = () => {
   return (
     <NavigationContainer
       theme={{
@@ -49,7 +49,7 @@ const AuthNavigation = ({updateUserInfo}: any) => {
         />
         <Stack.Screen
           name="Login"
-          component={() => <LoginScreen updateUserInfo={updateUserInfo} />}
+          component={() => <LoginScreen />}
           options={({navigation}) => ({
             headerLeft: () => (
               <Button title="Cancel" onPress={() => navigation.goBack()} />

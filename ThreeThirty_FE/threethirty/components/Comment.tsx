@@ -1,13 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import {ScrollView, TextInput} from 'react-native-gesture-handler';
-import {updateState} from '../recoil/postState';
-import {useRecoilState} from 'recoil';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {postIdState, updateState} from '../recoil/postState';
+import {useRecoilState, useRecoilValue} from 'recoil';
 import {TouchableOpacity} from 'react-native';
 import CommentBox from './CommentBox';
-import {API_URL} from '@env';
-import handleExpiredToken from '../utils/handleExpiredToken';
+import {useApiRequest} from '../apis/api';
+import {userState} from '../recoil/userState';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -63,43 +62,21 @@ interface CommentType {
 const Comment = ({navigation}: any) => {
   const [isUpdated, setIsUpdated] = useRecoilState(updateState);
   const [data, setData] = useState<CommentType[]>([]);
+  const postId = useRecoilValue(postIdState);
+  const user = useRecoilValue(userState);
+
+  const apiRequest = useApiRequest();
 
   const getComments = async () => {
     try {
-      const userData = await AsyncStorage.getItem('userData');
-      const postId = Number(await AsyncStorage.getItem('post_id'));
-      const accessToken = JSON.parse(userData!)?.accessToken;
+      const commentData = await apiRequest(
+        `/post/${postId}/comments`,
+        'GET',
+        null,
+      );
 
-      const response = await fetch(`${API_URL}/post/${postId}/comments`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const commentData = await response.json();
-      const resCode = JSON.stringify(commentData.code);
-
-      const resStatus = JSON.stringify(response.status);
-      if (resStatus === '200') {
+      if (commentData) {
         setData(commentData);
-      }
-
-      if (resCode === '"EXPIRED_TOKEN"') {
-        const newAccessToken = await handleExpiredToken();
-        if (newAccessToken) {
-          const res = await fetch(`${API_URL}/post/${postId}/comments`, {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${newAccessToken}`,
-            },
-          });
-          const newCommentData = await res.json();
-          setData(newCommentData);
-        }
       }
     } catch (err) {
       console.error(err);
@@ -118,28 +95,27 @@ const Comment = ({navigation}: any) => {
   const [comment, setComment] = useState('');
 
   const postComment = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-    const postId = Number(await AsyncStorage.getItem('post_id'));
-    const userId = JSON.parse(userData!)?.user_id;
+    const userId = JSON.parse(user!)?.user_id;
 
-    fetch(`${API_URL}/post/${postId}/comments/create`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        comment_content: comment,
-        user_id: userId,
-        post_id: postId,
-      }),
-    }).then(() => {
-      setIsUpdated(true);
-      setIsUpdated(false);
-      setComment('');
-    });
+    try {
+      const response = await apiRequest(
+        `/post/${postId}/comments/create`,
+        'POST',
+        {
+          comment_content: comment,
+          user_id: userId,
+          post_id: postId,
+        },
+      );
+
+      if (response) {
+        setIsUpdated(true);
+        setIsUpdated(false);
+        setComment('');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

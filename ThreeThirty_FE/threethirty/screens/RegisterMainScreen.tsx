@@ -7,7 +7,6 @@ import {
   View,
   StyleSheet,
   Dimensions,
-  // Linking,
 } from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
@@ -32,8 +31,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   socialButton: {
-    // width: screenWidth * 0.92,
-    // height: 60,
     width: screenWidth * 0.9,
     height: 40,
     alignItems: 'center',

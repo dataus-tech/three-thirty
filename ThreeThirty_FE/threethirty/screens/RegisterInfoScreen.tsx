@@ -4,12 +4,9 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   TouchableNativeFeedback,
   StyleSheet,
 } from 'react-native';
-import {Alert} from 'react-native';
-import {API_URL} from '@env';
 
 const styles = StyleSheet.create({
   desc: {

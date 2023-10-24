@@ -1,5 +1,4 @@
 import {API_URL} from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState} from 'react';
 import {Alert} from 'react-native';
 import {
@@ -10,6 +9,8 @@ import {
   Text,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useRecoilState} from 'recoil';
+import {userState} from '../recoil/userState';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -43,12 +44,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const TabAvatar = ({updateUserInfo}: any) => {
+const TabAvatar = () => {
   const [isButtonBoxOpened, setIsButtonBoxOpened] = useState(false);
-  const logOut = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const refreshToken = JSON.parse(userData!)?.refreshToken;
+  const [user, setUser] = useRecoilState(userState);
+  const refreshToken = JSON.parse(user!)?.refreshToken;
 
+  const logOut = async () => {
     fetch(`${API_URL}/users/logout`, {
       method: 'POST',
       headers: {
@@ -59,15 +60,13 @@ const TabAvatar = ({updateUserInfo}: any) => {
     }).then(response => {
       const status = JSON.stringify(response?.status);
       if (status === '200') {
-        AsyncStorage.removeItem('userData');
+        setUser(null);
         Alert.alert('로그아웃 되었습니다.');
       } else {
         Alert.alert('로그아웃에 실패했습니다.');
       }
     });
-
-    await AsyncStorage.removeItem('userData');
-    await updateUserInfo();
+    setUser(null);
   };
 
   const openButtonBox = () => {

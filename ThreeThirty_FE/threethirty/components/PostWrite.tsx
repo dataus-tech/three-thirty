@@ -1,5 +1,4 @@
 import {API_URL} from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -9,6 +8,9 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import {useRecoilValue, useSetRecoilState} from 'recoil';
+import {userState} from '../recoil/userState';
+import {postTypeState} from '../recoil/postState';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -41,14 +43,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
+const PostWrite = ({isWriteMode, setIsWriteMode}: any) => {
   const post = isWriteMode.post;
   const isEditMode = isWriteMode.edit;
   const [text, setText] = useState('');
   const [company, setCompany] = useState('');
   const hashtags = text.match(/#[\wㄱ-ㅎㅏ-ㅣ가-힣]+/g) || [''];
   const postId = post?.post_id;
-
   useEffect(() => {
     if (isEditMode) {
       setText(post.post_content);
@@ -57,19 +58,22 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const user: any = useRecoilValue(userState);
+  const setUserData = useSetRecoilState(userState);
+
   const storeData = async (userData: any) => {
     try {
-      await AsyncStorage.setItem('userData', userData);
+      setUserData(userData);
     } catch (error) {
       console.error(error);
     }
   };
+  const postType = useRecoilValue(postTypeState);
 
   const writePost = async () => {
     try {
-      const userData = await AsyncStorage.getItem('userData');
-      const accessToken = JSON.parse(userData!)?.accessToken;
-      const refreshToken = JSON.parse(userData!)?.refreshToken;
+      const accessToken = JSON.parse(user!)?.accessToken;
+      const refreshToken = JSON.parse(user!)?.refreshToken;
 
       const response = await fetch(`${API_URL}/post/create`, {
         method: 'POST',
@@ -79,7 +83,7 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          post_type_title: isThreeThirty ? 'threeThirty' : 'general',
+          post_type_title: postType,
           company_title: company,
           post_content: text,
           hashtag_content: hashtags,
@@ -98,7 +102,8 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
       const resp = await response.json();
       const message = JSON.stringify(resp.message);
       const status = JSON.stringify(response.status);
-      if (message === '"기간이 만료된 토큰"') {
+
+      if (message === ('"기간이 만료된 토큰"' && '"유효하지 않은 토큰"')) {
         if (refreshToken) {
           const newResp = await fetch(`${API_URL}/users/refreshToken`, {
             method: 'POST',
@@ -122,7 +127,7 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
                 Authorization: `Bearer ${accessToken}`,
               },
               body: JSON.stringify({
-                post_type_title: isThreeThirty ? 'threeThirty' : 'general',
+                post_type_title: postType,
                 company_title: company,
                 post_content: text,
                 hashtag_content: hashtags,
@@ -157,8 +162,7 @@ const PostWrite = ({isWriteMode, setIsWriteMode, isThreeThirty}: any) => {
   };
 
   const editPost = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
+    const accessToken = JSON.parse(user!)?.accessToken;
 
     fetch(`${API_URL}/post/${postId}`, {
       method: 'POST',

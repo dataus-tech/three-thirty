@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Alert,
   Dimensions,
@@ -11,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import {API_URL} from '@env';
+import {userState} from '../recoil/userState';
+import {useRecoilState} from 'recoil';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -46,13 +47,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const LoginScreen = ({updateUserInfo}: any) => {
+const LoginScreen = () => {
+  const [_, setUser] = useRecoilState(userState);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const storeData = async (userData: any) => {
     try {
-      await AsyncStorage.setItem('userData', userData);
+      setUser(userData);
     } catch (error) {
       console.error(error);
     }
@@ -83,14 +85,15 @@ const LoginScreen = ({updateUserInfo}: any) => {
           }
         })
         .then(res => {
-          const userData = JSON.stringify(res);
+          const userData: any = JSON.stringify(res);
           if (email !== '' && password !== '') {
             if (userData === 'null') {
               Alert.alert('사용자 정보를 확인해주세요.');
             } else {
+              Alert.alert(userData);
               Alert.alert('로그인이 완료되었습니다.');
+              setUser(userData);
               storeData(userData);
-              updateUserInfo();
               setEmail('');
               setPassword('');
             }

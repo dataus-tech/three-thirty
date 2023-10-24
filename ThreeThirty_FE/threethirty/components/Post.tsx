@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -8,10 +7,11 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {updateState} from '../recoil/postState';
-import {useRecoilState} from 'recoil';
+import {postIdState, updateState} from '../recoil/postState';
+import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
 import {API_URL} from '@env';
 import {PostType} from '../types/types';
+import {userState} from '../recoil/userState';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -93,10 +93,10 @@ const Post = (props: PostProps) => {
 
   const {handleGoToDetail, setIsWriteMode} = props;
 
-  const toggleLike = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
+  const user: any = useRecoilValue(userState);
+  const accessToken = JSON.parse(user!)?.accessToken;
 
+  const toggleLike = async () => {
     fetch(`${API_URL}/post/like/${post_id}`, {
       method: 'GET',
       headers: {
@@ -111,10 +111,8 @@ const Post = (props: PostProps) => {
       }
     });
   };
-  const toggleHate = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
 
+  const toggleHate = async () => {
     fetch(`${API_URL}/post/hate/${post_id}`, {
       method: 'GET',
       headers: {
@@ -132,18 +130,14 @@ const Post = (props: PostProps) => {
 
   useEffect(() => {
     async function fetchData() {
-      const userData = await AsyncStorage.getItem('userData');
-      setUserId(JSON.parse(userData!)?.user_id);
+      setUserId(JSON.parse(user!)?.user_id);
     }
     fetchData();
-  }, []);
+  }, [user]);
 
   const isPostWriter = user_id === Number(userId);
 
   const deletePost = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-
     fetch(`${API_URL}/post/${post_id}`, {
       method: 'DELETE',
       headers: {
@@ -160,14 +154,12 @@ const Post = (props: PostProps) => {
     });
   };
 
-  const setPostId = async () => {
-    await AsyncStorage.setItem('post_id', String(post_id));
-  };
+  const setPostId = useSetRecoilState(postIdState);
 
   return (
     <TouchableOpacity
       onPress={async () => {
-        await setPostId();
+        setPostId(post_id);
         handleGoToDetail(post_id);
       }}>
       {isPostWriter && (

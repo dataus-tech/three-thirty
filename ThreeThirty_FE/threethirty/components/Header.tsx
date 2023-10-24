@@ -1,5 +1,7 @@
 import React, {Dispatch, SetStateAction} from 'react';
 import {View, TouchableWithoutFeedback, Text, StyleSheet} from 'react-native';
+import {useSetRecoilState} from 'recoil';
+import {postTypeState} from '../recoil/postState';
 import TabAvatar from './TabAvatar';
 
 const styles = StyleSheet.create({
@@ -24,34 +26,50 @@ const styles = StyleSheet.create({
 
 interface HeaderProps {
   setScreen: Dispatch<SetStateAction<any>>;
-  updateUserInfo: any;
 }
 
-const Header = ({setScreen, updateUserInfo}: HeaderProps) => {
+const Header = ({setScreen}: HeaderProps) => {
+  const setPostType = useSetRecoilState(postTypeState);
   return (
     <View>
-      <TabAvatar updateUserInfo={updateUserInfo} />
+      <TabAvatar />
       <View style={styles.header}>
         <View style={styles.box}>
-          <TouchableWithoutFeedback onPress={() => setScreen('main')}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setScreen('main');
+              setPostType('general');
+            }}>
             <Text style={styles.text}>Main</Text>
           </TouchableWithoutFeedback>
         </View>
         <View style={styles.line} />
         <View style={styles.box}>
-          <TouchableWithoutFeedback onPress={() => setScreen('threeThirty')}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setScreen('threeThirty');
+              setPostType('threeThirty');
+            }}>
             <Text style={styles.text}>3:30</Text>
           </TouchableWithoutFeedback>
         </View>
         <View style={styles.line} />
         <View style={styles.box}>
-          <TouchableWithoutFeedback onPress={() => setScreen('funny')}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setScreen('funny');
+              setPostType('general');
+            }}>
             <Text style={styles.text}>Funny</Text>
           </TouchableWithoutFeedback>
         </View>
         <View style={styles.line} />
         <View style={styles.box}>
-          <TouchableWithoutFeedback onPress={() => setScreen('following')}>
+          <TouchableWithoutFeedback
+            onPress={() => {
+              setScreen('following');
+              setPostType('general');
+            }}>
             <Text style={styles.text}>Following</Text>
           </TouchableWithoutFeedback>
         </View>

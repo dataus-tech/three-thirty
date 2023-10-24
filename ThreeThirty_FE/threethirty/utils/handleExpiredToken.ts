@@ -1,17 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_URL} from '@env';
+import {useSetRecoilState} from 'recoil';
+import {userState} from '../recoil/userState';
 
-const storeData = async (userData: any) => {
+const useStoreData = async (userData: any) => {
+  const setUserState = useSetRecoilState(userState);
+
   try {
-    await AsyncStorage.setItem('userData', userData);
+    setUserState(userData);
   } catch (error) {
     console.error(error);
   }
 };
 
-const handleExpiredToken = async () => {
+const handleExpiredToken = async (userData: any) => {
   try {
-    const userData = await AsyncStorage.getItem('userData');
     const refreshToken = JSON.parse(userData!)?.refreshToken;
 
     if (refreshToken) {
@@ -27,7 +29,8 @@ const handleExpiredToken = async () => {
       if (resp.status === 200) {
         const reponseData = await resp.json();
         const newUserData = JSON.stringify(reponseData);
-        storeData(newUserData);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useStoreData(newUserData);
 
         return reponseData.accessToken;
       }

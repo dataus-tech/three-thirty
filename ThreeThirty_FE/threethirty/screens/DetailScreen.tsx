@@ -7,12 +7,12 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {updateState} from '../recoil/postState';
+import {postIdState, updateState} from '../recoil/postState';
 import {useRecoilState} from 'recoil';
 import Comment from '../components/Comment';
 import {API_URL} from '@env';
 import handleExpiredToken from '../utils/handleExpiredToken';
+import {userState} from '../recoil/userState';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -67,13 +67,12 @@ interface DetailPostType {
 
 const DetailScreen = ({navigation}: any) => {
   const [detailData, setDetailData] = useState<DetailPostType[]>([]);
+  const [user] = useRecoilState(userState);
+  const [postId] = useRecoilState(postIdState);
+  const accessToken = JSON.parse(user!)?.accessToken;
 
   const getDetailPost = async () => {
     try {
-      const userData = await AsyncStorage.getItem('userData');
-      const postId = Number(await AsyncStorage.getItem('post_id'));
-      const accessToken = JSON.parse(userData!)?.accessToken;
-
       const response = await fetch(`${API_URL}/post/${postId}`, {
         method: 'GET',
         headers: {
@@ -90,7 +89,7 @@ const DetailScreen = ({navigation}: any) => {
       }
 
       if (resCode === '"EXPIRED_TOKEN"') {
-        const newAccessToken = await handleExpiredToken();
+        const newAccessToken = await handleExpiredToken(user);
         if (newAccessToken) {
           const res = await fetch(`${API_URL}/post/${postId}`, {
             method: 'GET',
@@ -128,10 +127,6 @@ const DetailScreen = ({navigation}: any) => {
   const hate_status = detailData[0]?.hate_status;
 
   const toggleLike = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-    const postId = Number(await AsyncStorage.getItem('post_id'));
-
     fetch(`${API_URL}/post/like/${postId}`, {
       method: 'GET',
       headers: {
@@ -147,10 +142,6 @@ const DetailScreen = ({navigation}: any) => {
     });
   };
   const toggleHate = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-    const postId = Number(await AsyncStorage.getItem('post_id'));
-
     fetch(`${API_URL}/post/hate/${postId}`, {
       method: 'GET',
       headers: {

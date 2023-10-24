@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -8,9 +7,10 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import {updateState} from '../recoil/postState';
-import {useRecoilState} from 'recoil';
-import {API_URL} from '@env';
+import {postIdState, updateState} from '../recoil/postState';
+import {useRecoilState, useRecoilValue} from 'recoil';
+import {useApiRequest} from '../apis/api';
+import {userState} from '../recoil/userState';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -60,67 +60,60 @@ const CommentBox = ({post}: any) => {
   const [_, setIsUpdated] = useRecoilState(updateState);
   const commentId = post?.comment_id;
   const commentContent = post?.comment_content;
+  const postId = useRecoilValue(postIdState);
+
+  const apiRequest = useApiRequest();
 
   const deleteComment = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-    const postId = Number(await AsyncStorage.getItem('post_id'));
-
-    fetch(`${API_URL}/post/${postId}/comments/${commentId}`, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }).then(response => {
-      const status = JSON.stringify(response?.status);
-      if (status === '200') {
+    try {
+      const res = await apiRequest(
+        `/post/${postId}/comments/${commentId}`,
+        'POST',
+        null,
+      );
+      if (res.status === 200) {
         setIsUpdated(true);
         setIsUpdated(false);
       }
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const [userId, setUserId] = useState();
 
+  const user = useRecoilValue(userState);
+
   useEffect(() => {
     async function fetchData() {
-      const userData = await AsyncStorage.getItem('userData');
-      setUserId(JSON.parse(userData!)?.user_id);
+      setUserId(JSON.parse(user!)?.user_id);
     }
     fetchData();
-  }, []);
+  }, [user]);
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [comment, setComment] = useState(post?.comment_content);
 
   const editComment = async () => {
-    const userData = await AsyncStorage.getItem('userData');
-    const accessToken = JSON.parse(userData!)?.accessToken;
-    const postId = Number(await AsyncStorage.getItem('post_id'));
+    try {
+      const res = await apiRequest(
+        `/post/${postId}/comments/${commentId}`,
+        'PATCH',
+        {
+          comment_content: comment,
+          user_id: userId,
+          post_id: postId,
+        },
+      );
 
-    fetch(`${API_URL}/post/${postId}/comments/${commentId}`, {
-      method: 'PATCH',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        comment_content: comment,
-        user_id: userId,
-        post_id: postId,
-      }),
-    }).then(response => {
-      const status = JSON.stringify(response?.status);
-
-      if (status === '200') {
+      if (res.status === 200) {
         setIsUpdated(true);
         setIsUpdated(false);
         setIsEditMode(false);
       }
-    });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const cancelCommentEdit = () => {
